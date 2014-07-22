@@ -12,10 +12,10 @@
 (function($) {
     
        
-	    //toggle for click on zselect, close for click elsewhere, nothing for click on .zselect *
+        //toggle for click on zselect, close for click elsewhere, nothing for click on .zselect *
         $(document).mouseup(function (e){
-			var container = $(".zselect ul");
-            if ( container.parent().is(e.target) || ( container.is(':visible') && !container.parent().is(e.target) ) && ( container.has(e.target).length === 0 )  ) {
+            var container = $(".zselect .zlist-container");
+            if ( (container.parent().is(e.target) || (container.parent().has(e.target).length > 0 && container.has(e.target).length < 1) ) || ( container.is(':visible') && !container.parent().is(e.target) ) && ( container.has(e.target).length === 0 )  ) {
                 container.toggle();
                 //console.log(e.target);
             }
@@ -36,6 +36,11 @@
         $(document).on('click', '.zselect li', function(e){ 
             if($(e.target).prop("tagName") !== "INPUT"){
                     $("input:checkbox[disabled!='disabled']",this).prop('checked', function( i, val ) { return !val; }).trigger('change');
+                    if($('input[type=checkbox]:checked').length >= 5){
+                        $('input:checkbox:not(:checked)').prop('disabled', true);
+                    } else {
+                        $('input:checkbox[disabled=disabled]').prop('disabled', false);
+                    }
             }
             
         });
@@ -59,7 +64,7 @@
                 
                 var w = $(v).outerWidth(); 
                 
-                $(v).find("ul").attr('style', 'width:'+w+'px!important;' );
+                $(v).find("ul").attr('style', 'width:'+w+'px;' );
                 
                 
                 //var size = Math.max(Math.min(w / (1), parseFloat(20)), parseFloat(11));
@@ -79,21 +84,21 @@
 
 
         function refreshPlaceholder(rel, placeholder, selectedText) {
-             selectedText = selectedText || "Selected %1 item%s1 of %2 item%s2"; 
-             var checked=$("div#"+rel+" ul li input:checked").length; 
-             var tot=$("div#"+rel+" ul li input:checkbox").length; 
+             // selectedText = selectedText || "Selected %1 item%s1 of %2 item%s2"; 
+             // var checked=$("div#"+rel+" ul li input:checked").length; 
+             // var tot=$("div#"+rel+" ul li input:checkbox").length; 
   
-             if(checked>0) {
-                 var checkedS = checked > 1 ? "s" : "";
-                 var totS = tot > 1 ? "s" : "";
-                 var txt = selectedText.replace(/%1/g, checked)
-                                       .replace(/%2/g, tot)
-                                       .replace(/%s1/g, checkedS)
-                                       .replace(/%s2/g, totS);
-                 $(".zselect#"+rel+" span.zmshead").text(txt); 
-             } else { 
-                 $(".zselect#"+rel+" span.zmshead").html( (placeholder===undefined) ? '&nbsp;' : placeholder ); 
-             }
+             // if(checked>0) {
+             //     var checkedS = checked > 1 ? "s" : "";
+             //     var totS = tot > 1 ? "s" : "";
+             //     var txt = selectedText.replace(/%1/g, checked)
+             //                           .replace(/%2/g, tot)
+             //                           .replace(/%s1/g, checkedS)
+             //                           .replace(/%s2/g, totS);
+             //     $(".zselect#"+rel+" span.zmshead").text(txt); 
+             // } else { 
+             //     $(".zselect#"+rel+" span.zmshead").html( (placeholder===undefined) ? '&nbsp;' : placeholder ); 
+             // }
         }
 
 
@@ -112,7 +117,7 @@ var methods = {
         
             id=Math.random().toString(36).substr(2, 9);
             $(v).hide().attr('rel',id);  
-            $(v).parent().append("<div id='"+id+"' class='zselect'><span class='zmshead'></span><ul></ul></div>");
+            $(v).parent().append("<div id='"+id+"' class='zselect'><span class='zmshead'></span><div class='zlist-container'><ul></ul></div></div>");
             
             if(options.selectAll!==false){
                 var sAllText="Select All";
