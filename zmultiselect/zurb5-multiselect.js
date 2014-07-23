@@ -27,22 +27,38 @@
             e = e || window.event;
             if (e.keyCode === 27) {
                 $("li.zmsfilter input").val('').keyup(); //clean filter
-                $(".zselect ul").hide();
+                $(".zselect .zlist-container").hide();
             }
         });
         
         
         //click on label toggle input
-        $(document).on('click', '.zselect li', function(e){ 
+        $(document).on('click', '.zselect .topics li', function(e){ 
             if($(e.target).prop("tagName") !== "INPUT"){
                     $("input:checkbox[disabled!='disabled']",this).prop('checked', function( i, val ) { return !val; }).trigger('change');
-                    if($('input[type=checkbox]:checked').length >= 5){
-                        $('input:checkbox:not(:checked)').prop('disabled', true);
-                    } else {
-                        $('input:checkbox[disabled=disabled]').prop('disabled', false);
-                    }
             }
+
+            var li = $(e.target).closest('li');
+            if(li.find("input:checkbox[disabled!='disabled']").length > 0){
+                li.fadeOut("fast", function() {
+                    $(this).appendTo('.zselect ul.active').fadeIn('fast');
+                });
+            }
+
+            countChecked();
+        });
+
+        $(document).on('click', '.zselect .active li', function(e){ 
+            if($(e.target).prop("tagName") !== "INPUT"){
+                    $("input:checkbox[disabled!='disabled']",this).prop('checked', function( i, val ) { return !val; }).trigger('change');
+            }  
             
+            var li = $(e.target).closest('li');
+            li.fadeOut("fast", function() {
+                li.insertAfter('.zselect ul.topics .zmsfilter').fadeIn('fast');
+            });
+
+            countChecked();
         });
         
         //select all and deselect all
@@ -56,22 +72,30 @@
            $(this).parent().find(".optgroup_"+$(this).attr('data-optgroup')+" li input:checkbox[disabled!='disabled']").prop('checked', function( i, val ) { return !val; }).change();
         });
         
-        
+
+        function countChecked(){
+            if($('input[type=checkbox]:checked').length >= 5){
+                $('input:checkbox:not(:checked)').prop('disabled', true);
+            } else {
+                $('input:checkbox[disabled=disabled]').prop('disabled', false);
+            }
+        }
+
         //when resize window + init
         function onResize(reflow){ 
             $.each( $(".zselect"), function(k,v){
-                //if( $(v).find("ul").attr('style') !== undefined && reflow !== true ) return false; //break if already set
+                //if( $(v).find("ul.topics").attr('style') !== undefined && reflow !== true ) return false; //break if already set
                 
                 var w = $(v).outerWidth(); 
                 
-                $(v).find("ul").attr('style', 'width:'+w+'px;' );
+                $(v).find("ul.topics").attr('style', 'width:'+w+'px;' );
                 
                 
                 //var size = Math.max(Math.min(w / (1), parseFloat(20)), parseFloat(11));
                 //console.log(size);
-                //$(v).find('ul li').css('font-size', size);
+                //$(v).find('ul.topics li').css('font-size', size);
                 
-                var w_li = $(v).find('ul li:eq(0)').width();
+                var w_li = $(v).find('ul.topics li:eq(0)').width();
                 //console.log(w_li);
                 
             });
@@ -85,8 +109,8 @@
 
         function refreshPlaceholder(rel, placeholder, selectedText) {
              // selectedText = selectedText || "Selected %1 item%s1 of %2 item%s2"; 
-             // var checked=$("div#"+rel+" ul li input:checked").length; 
-             // var tot=$("div#"+rel+" ul li input:checkbox").length; 
+             // var checked=$("div#"+rel+" ul.topics li input:checked").length; 
+             // var tot=$("div#"+rel+" ul.topics li input:checkbox").length; 
   
              // if(checked>0) {
              //     var checkedS = checked > 1 ? "s" : "";
@@ -117,7 +141,7 @@ var methods = {
         
             id=Math.random().toString(36).substr(2, 9);
             $(v).hide().attr('rel',id);  
-            $(v).parent().append("<div id='"+id+"' class='zselect'><span class='zmshead'></span><div class='zlist-container'><ul></ul></div></div>");
+            $(v).parent().append("<div id='"+id+"' class='zselect'><span class='zmshead'></span><div class='zlist-container'><ul class='active'><li>Active Topics:</li></ul><hr/><ul class='topics'></ul></div></div>");
             
             if(options.selectAll!==false){
                 var sAllText="Select All";
@@ -127,8 +151,8 @@ var methods = {
                     desAllText=options.selectAllText[1];
                 }
                 
-                $('#'+id+' ul').append("<li class='selectall'>"+sAllText+"</li>");
-                $('#'+id+' ul').append("<li class='deselectall'>"+desAllText+"</li>");
+                $('#'+id+' ul.topics').append("<li class='selectall'>"+sAllText+"</li>");
+                $('#'+id+' ul.topics').append("<li class='deselectall'>"+desAllText+"</li>");
             }
             
             $.each(v, function(j,z){
@@ -139,13 +163,13 @@ var methods = {
                     optgroup_members += optgroup_size;
                     optgroup_name = $(z).parent().attr("label");  
                     
-                    $('#'+id+' ul').append("<li class='optgroup' data-optgroup='"+optgroup_id+"'>"+$(z).parent().attr("label")+"</li>");
-                    $('#'+id+' ul').append($("<div>").addClass('optgroup_'+optgroup_id));
+                    $('#'+id+' ul.topics').append("<li class='optgroup' data-optgroup='"+optgroup_id+"'>"+$(z).parent().attr("label")+"</li>");
+                    $('#'+id+' ul.topics').append($("<div>").addClass('optgroup_'+optgroup_id));
                     optgroup.push($(z).parent().attr("label"));
                 }
                 //console.log( $(z).attr('value') + " " + $(z).text() + " " + $(z).is('[data-selected]') + " " + $(z).is(':selected'));
                 //console.log(id);
-                //console.log( '#'+id+' ul' );
+                //console.log( '#'+id+' ul.topics' );
                 checked = ( $(z).is('[data-selected]') || $(z).is(':selected')) ? "checked='checked'" : "";
                 dataZ = ( $(z).data("z") !== undefined ) ? 'data-z="' + $(z).data("z") + '"' : "";
                 
@@ -157,7 +181,7 @@ var methods = {
                     disabled = disabledClass = "";
                 }
                 
-                if( optgroup_name === false ) appendTo = '#'+id+' ul';
+                if( optgroup_name === false ) appendTo = '#'+id+' ul.topics';
                 else                          appendTo = '#'+id+' ul div.optgroup_'+optgroup_id;
                     
                     
@@ -182,17 +206,17 @@ var methods = {
             
             
             var rel = this.attr('rel');
-            $("div#"+rel+" ul").prepend('<li class="zmsfilter"><input type="text" placeholder="'+fplaholder+'" /></li>');
+            $("div#"+rel+" ul.topics").prepend('<li class="zmsfilter"><input type="text" placeholder="'+fplaholder+'" /></li>');
 
             
 
             if(options.filterResult === true)
-                $("div#"+rel+" ul").append('<li class="filterResult"></li>');
+                $("div#"+rel+" ul.topics").append('<li class="filterResult"></li>');
             
-            $("div#"+rel+" ul li.zmsfilter input").keyup(function(){
+            $("div#"+rel+" ul.topics li.zmsfilter input").keyup(function(){
                     var value=$(this).val().toLowerCase();
-                    var show=0,tot=$("div#"+rel+" ul li input:checkbox").length;
-                    $("div#"+rel+" ul li input:checkbox").filter( function(i,v) {
+                    var show=0,tot=$("div#"+rel+" ul.topics li input:checkbox").length;
+                    $("div#"+rel+" ul.topics li input:checkbox").filter( function(i,v) {
                           //console.log($(v).val());
                           //console.log($(v).parent().text());
                           if( $(v).val().toLowerCase().indexOf(value) === -1 && $(v).parent().text().toLowerCase().indexOf(value) === -1 ){//and text() check...
@@ -207,7 +231,7 @@ var methods = {
                     });
                      
                     if(options.filterResult === true) 
-                        $("div#"+rel+" ul li.filterResult").text(options.filterResultText + ' '+show+'/'+tot);
+                        $("div#"+rel+" ul.topics li.filterResult").text(options.filterResultText + ' '+show+'/'+tot);
                     
                 });
         }//end filter
@@ -238,7 +262,7 @@ var methods = {
                 var rel = this.attr('rel');
                 for(var i=0; i<need.length; i++){
                     //console.log(need[i]);
-                    $(".zselect#"+rel+" ul li input:checkbox[value='"+need[i]+"']").trigger('click');
+                    $(".zselect#"+rel+" ul.topics li input:checkbox[value='"+need[i]+"']").trigger('click');
                    
                 }
                 refreshPlaceholder(rel,options.placeholder,options.selectedText);
@@ -256,8 +280,17 @@ var methods = {
                 if($(v).val() !== undefined){
                     if($(v).prop('checked')) {
                         select.find("option[value='"+$(v).val()+"']").prop("selected", true);
+                        //Move items to active list
+                        
+                            // $(this).parent().fadeOut("fast", function() {
+                            //     $(this).appendTo('.zselect ul.active').fadeIn('fast');
+                            // });
+
                     } else {
                         select.find("option[value='"+$(v).val()+"']").prop("selected", false);
+                        // $(this).parent().fadeOut("fast", function() {
+                        //     $(this).prependTo('.zselect ul.topics').fadeIn('fast');
+                        // });
                     }
                 }
             });
@@ -276,7 +309,7 @@ var methods = {
        if(selector===undefined) selector = this; 
        var value = new Array();
        var rel   = $(selector).attr('rel');
-       $.each( $("div#"+rel+" ul li input"), function(k,v){
+       $.each( $("div#"+rel+" ul.topics li input"), function(k,v){
           if( $(v).val() !== undefined ){
                if( $(v).prop('checked') )
                value.push($(v).val());
@@ -287,40 +320,46 @@ var methods = {
     
         
     open : function( ) {
-        $("div#"+$(this).attr('rel')+" ul").show();
+        $("div#"+$(this).attr('rel')+" ul.topics").show();
     },
     close : function( ) {
-        $("div#"+$(this).attr('rel')+" ul").hide();
+        $("div#"+$(this).attr('rel')+" ul.topics").hide();
     },
     
             
     disable : function (val,state){ //console.log(state);
         if(val!==undefined){
-            if(state) $("div#"+$(this).attr('rel')+" ul li input:checkbox[value='"+val+"']").attr('disabled','disabled');
-            else      $("div#"+$(this).attr('rel')+" ul li input:checkbox[value='"+val+"']").removeAttr('disabled');
+            if(state) $("div#"+$(this).attr('rel')+" ul.topics li input:checkbox[value='"+val+"']").attr('disabled','disabled');
+            else      $("div#"+$(this).attr('rel')+" ul.topics li input:checkbox[value='"+val+"']").removeAttr('disabled');
         }
         else{
-            if(state) $("div#"+$(this).attr('rel')+" ul li input:checkbox").attr('disabled','disabled');
-            else      $("div#"+$(this).attr('rel')+" ul li input:checkbox").removeAttr('disabled');
+            if(state) $("div#"+$(this).attr('rel')+" ul.topics li input:checkbox").attr('disabled','disabled');
+            else      $("div#"+$(this).attr('rel')+" ul.topics li input:checkbox").removeAttr('disabled');
         }
     },
     set : function (val,checked){
-        $("div#"+$(this).attr('rel')+" ul li input:checkbox[value='"+val+"']").prop('checked', checked).change();
+        var item = $("div#"+$(this).attr('rel')+" ul.topics li input:checkbox[value='"+val+"']");
+        item.prop('checked', checked).change();
+        if(checked === true && item){
+            item.parent().fadeOut("fast", function() {
+                $(this).appendTo('.zselect ul.active').fadeIn('fast');
+            });
+        }
     },
     uncheckall_inpage : function( ) {
-        $(".zselect ul li input:checkbox").prop('checked', false).change();
+        $(".zselect ul.topics li input:checkbox").prop('checked', false).change();
     },
     checkall_inpage : function( ) {
-        $(".zselect ul li input:checkbox").prop('checked', true).change();
+        $(".zselect ul.topics li input:checkbox").prop('checked', true).change();
     },
     checkall : function( ) {
-        $("div#"+$(this).attr('rel')+" ul li input:checkbox").prop('checked', true).change();
+        $("div#"+$(this).attr('rel')+" ul.topics li input:checkbox").prop('checked', true).change();
     },
     uncheckall : function( ) {
-        $("div#"+$(this).attr('rel')+" ul li input:checkbox").prop('checked', false).change();
+        $("div#"+$(this).attr('rel')+" ul.topics li input:checkbox").prop('checked', false).change();
     },
     destroy : function (val){
-        $("div#"+$(this).attr('rel')+" ul li input:checkbox[value='"+val+"']").parent().remove();
+        $("div#"+$(this).attr('rel')+" ul.topics li input:checkbox[value='"+val+"']").parent().remove();
     },
     reflow : function(){
         onResize(true);
@@ -333,13 +372,13 @@ var methods = {
         if(option.checked)  checked=' checked="checked" ';
         if(option.disabled) {disabled=' disabled="disabled" '; disabledClass=' class="disabled" ';}
         
-        if(position === 'append') $("div#"+$(this).attr('rel')+" ul").append("<li "+disabledClass+"><input value='"+option.value+"' type='checkbox' "+checked+" "+disabled+" />&nbsp;"+option.text+"</li>");
+        if(position === 'append') $("div#"+$(this).attr('rel')+" ul.topics").append("<li "+disabledClass+"><input value='"+option.value+"' type='checkbox' "+checked+" "+disabled+" />&nbsp;"+option.text+"</li>");
         else {
             if(position === 'prepend'){
-               $("<li "+disabledClass+"><input value='"+option.value+"' type='checkbox' "+checked+" "+disabled+" />&nbsp;"+option.text+"</li>").insertAfter($("div#"+$(this).attr('rel')+" ul li.deselectall"));
+               $("<li "+disabledClass+"><input value='"+option.value+"' type='checkbox' "+checked+" "+disabled+" />&nbsp;"+option.text+"</li>").insertAfter($("div#"+$(this).attr('rel')+" ul.topics li.deselectall"));
             }
             else{
-               $("<li "+disabledClass+"><input value='"+option.value+"' type='checkbox' "+checked+" "+disabled+" />&nbsp;"+option.text+"</li>").insertAfter($("div#"+$(this).attr('rel')+" ul li input[value='"+position.substring(1)+"']").closest('li')); 
+               $("<li "+disabledClass+"><input value='"+option.value+"' type='checkbox' "+checked+" "+disabled+" />&nbsp;"+option.text+"</li>").insertAfter($("div#"+$(this).attr('rel')+" ul.topics li input[value='"+position.substring(1)+"']").closest('li')); 
             }
         }
         

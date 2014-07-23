@@ -22,7 +22,7 @@
 .zselect div {
     display: none;
 }
-.zselect ul{
+.zselect ul.topics {
         display:block;
         position:absolute;
         background-color:#fafafa;
@@ -37,46 +37,46 @@
 .zselect span.zmshead{
         font-size: 0.9rem;
 }
-.zselect ul li{
+.zselect ul.topicsli{
         padding:4px 0.70rem 0px 0.70rem;
         font-size:0.9rem;
 }
-.zselect ul li span{
+.zselect ul.topicsli span{
         
         
 }
-.zselect ul li.disabled{
+.zselect ul.topicsli.disabled{
         color:#808080;
 }
-.zselect ul li:hover{
+.zselect ul.topicsli:hover{
         background-color:#2672EC;
         color: #fff;
 }
-.zselect ul li.zmsfilter,
-.zselect ul li.zmsfilter:hover,
-.zselect ul li.filterResult,
-.zselect ul li.filterResult:hover,
-.zselect ul li.optgroup,
-.zselect ul li.optgroup:hover{
+.zselect ul.topicsli.zmsfilter,
+.zselect ul.topicsli.zmsfilter:hover,
+.zselect ul.topicsli.filterResult,
+.zselect ul.topicsli.filterResult:hover,
+.zselect ul.topicsli.optgroup,
+.zselect ul.topicsli.optgroup:hover{
         background-color:transparent;
         color: #000;
        
 }
-.zselect ul li.zmsfilter input{
+.zselect ul.topicsli.zmsfilter input{
         margin-bottom:0.3rem;
 }
-.zselect ul li input[type='checkbox']{ 
+.zselect ul.topicsli input[type='checkbox']{ 
         padding:0;
         margin:0;
         
 } 
-.zselect ul li.filterResult{
+.zselect ul.topicsli.filterResult{
         font-size: 0.8em;
 }
 
-.zselect ul li.optgroup{
+.zselect ul.topicsli.optgroup{
     font-weight: bold;
     cursor:pointer;
 }
-.zselect ul li.selectall{}
-.zselect ul li.deselectall{}
+.zselect ul.topicsli.selectall{}
+.zselect ul.topicsli.deselectall{}
