@@ -74,10 +74,10 @@
         
 
         function countChecked(){
-            if($('input[type=checkbox]:checked').length >= 5){
-                $('input:checkbox:not(:checked)').prop('disabled', true);
+            if($('.zlist-container input[type=checkbox]:checked').length >= 5){
+                $('.zlist-container input:checkbox:not(:checked)').prop('disabled', true);
             } else {
-                $('input:checkbox[disabled=disabled]').prop('disabled', false);
+                $('.zlist-container input:checkbox[disabled=disabled]').prop('disabled', false);
             }
         }
 
